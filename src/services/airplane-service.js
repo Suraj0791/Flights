@@ -18,11 +18,16 @@ async function createAirplane(data){
       }
       catch(error) {
         if(error.name == 'PrismaClientValidationError') {
+          if (error.errors) {
             let explanation = [];
             error.errors.forEach((err) => {
-                explanation.push(err.message);
+              explanation.push(err.message);
             });
             throw new AppError(explanation, StatusCodes.BAD_REQUEST);
+          } else {
+            // Handle the case where error.errors is undefined
+            throw new AppError('Unknown error', StatusCodes.BAD_REQUEST);
+          }
         }
         throw new AppError('Cannot create a new Airplance object', StatusCodes.INTERNAL_SERVER_ERROR);
     }

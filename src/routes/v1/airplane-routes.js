@@ -1,5 +1,5 @@
 const{Airplanecontroller}=require('../../controllers')
-const{Airplanecontroller, Airplanemiddleware}=require('../../middlewares')
+const{ Airplanemiddleware}=require('../../middlewares')
 
 const express = require('express');
 

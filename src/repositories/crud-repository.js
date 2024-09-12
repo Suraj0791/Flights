@@ -43,6 +43,7 @@ class CrudRepository {
     async getAll() {
         const response = await this.model.findMany();
         return response;
+
     }
 
     async update(id, data) {
@@ -52,6 +53,9 @@ class CrudRepository {
             },
             data: data
         });
+        if (!response) {
+            throw new AppError('Not able to find the resource', StatusCodes.NOT_FOUND);
+        }
         return response;
     }
 }
