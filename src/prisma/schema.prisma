@@ -13,18 +13,84 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Airplane {
-  id          String   @id @default(uuid())
-  modelnumber      String
-  capacity     Int
-  seatsPerRow  Int
-  rows         Int
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+
+model City {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  airports  Airport[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("Cities")
 }
 
+model Airport {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  code      String   @unique
+  address   String?  @unique
+  cityId    Int
+  city      City     @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  departures Flight[] @relation("DepartureAirport")
+  arrivals  Flight[] @relation("ArrivalAirport")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@map("Airports")
+}
 
+model Airplane {
+  id        Int       @id @default(autoincrement())
+  modelnumber String
+  capacity  Int
+  flights   Flight[]
+  seats     Seat[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
+  @@map("Airplanes")
+}
+
+model Flight {
+  id                 Int       @id @default(autoincrement())
+  flightNumber       String
+  airplaneId         Int
+  airplane           Airplane  @relation(fields: [airplaneId], references: [id], onDelete: Cascade)
+  departureAirportId String
+  departureAirport   Airport   @relation("DepartureAirport", fields: [departureAirportId], references: [code], onDelete: Cascade)
+  arrivalAirportId   String
+  arrivalAirport     Airport   @relation("ArrivalAirport", fields: [arrivalAirportId], references: [code], onDelete: Cascade)
+  arrivalTime        DateTime
+  departureTime      DateTime
+  price              Int
+  boardingGate       String?
+  totalSeats         Int
+  seats              Seat[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@map("Flights")
+}
+
+model Seat {
+  id         Int       @id @default(autoincrement())
+  airplaneId Int
+  airplane   Airplane  @relation(fields: [airplaneId], references: [id], onDelete: Cascade)
+  row        Int
+  col        String
+  type       SeatType  @default(ECONOMY)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("Seats")
+  Flight Flight[]
+}
+
+enum SeatType {
+  BUSINESS
+  ECONOMY
+  PREMIUM_ECONOMY
+  FIRST_CLASS
+}
 
 
