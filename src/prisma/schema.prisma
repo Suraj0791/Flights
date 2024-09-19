@@ -72,6 +72,7 @@ model Flight {
   @@map("Flights")
 }
 
+//setas m hamein jyada cru krna h nhi isilye seeder se value feed krenge 
 model Seat {
   id         Int       @id @default(autoincrement())
   airplaneId Int

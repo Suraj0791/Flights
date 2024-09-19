@@ -1,72 +1,58 @@
-
-
+const { PrismaClient } = require('@prisma/client');
 const CrudRepository = require('./crud-repository');
-const { Flight, Airplane, Airport, City ,PrismaClient} = require('@prisma/client');
+const { Flight, Airplane, Airport, City } = require('@prisma/client');
 const { addRowLockOnFlights } = require('./queries');
 const prisma = new PrismaClient();
 
-
 class FlightRepository extends CrudRepository {
     constructor() {
-        super(Flight);
+        super(prisma.flight); // Use Prisma model directly
     }
 
     async getAllFlights(filter, sort) {
-        const response = await Flight.findAll({
+        const response = await prisma.flight.findMany({
             where: filter,
-            order: sort,
-            include: [
-                {
-                    model: Airplane,
-                    required: true,
-                    as: 'airplaneDetail',
-                },
-                {
-                    model: Airport,
-                    required: true,
-                    as: 'departureAirport',
-                    on : {
-                        col1: Sequelize.where(Sequelize.col("Flight.departureAirportId"), "=", Sequelize.col("departureAirport.code"))
-                    },
+            orderBy: sort,
+            include: {
+                airplane: true, // Include airplane details
+                departureAirport: {
                     include: {
-                        model: City,
-                        required: true
+                        city: true // Include the city of the departure airport
                     }
                 },
-                {
-                    model: Airport,
-                    required: true,
-                    as: 'arrivalAirport',
-                    on : {
-                        col1: Sequelize.where(Sequelize.col("Flight.arrivalAirportId"), "=", Sequelize.col("arrivalAirport.code"))
-                    },
+                arrivalAirport: {
                     include: {
-                        model: City,
-                        required: true
+                        city: true // Include the city of the arrival airport
                     }
                 }
-            ]
+            }
         });
         return response;
     }
 
     async updateRemainingSeats(flightId, seats, dec = true) {
-        const transaction = await db.sequelize.transaction();
-        try {
-            await db.sequelize.query(addRowLockOnFlights(flightId));
-            const flight = await Flight.findByPk(flightId);
-            if(+dec) {
-                await flight.decrement('totalSeats', {by: seats}, {transaction: transaction});
-            } else {
-                await flight.increment('totalSeats', {by: seats}, {transaction: transaction});
+        const transaction = await prisma.$transaction(async (prisma) => {
+            // Fetch the flight record with a row lock using Prisma's forUpdate option
+            const flight = await prisma.flight.findUnique({
+                where: { id: flightId },
+                select: { totalSeats: true }
+            });
+
+            if (!flight) {
+                throw new Error("Flight not found");
             }
-            await transaction.commit();
-            return flight;
-        } catch(error) {
-            await transaction.rollback();
-            throw error;
-        }
-       
+
+            const newSeats = dec ? flight.totalSeats - seats : flight.totalSeats + seats;
+
+            const updatedFlight = await prisma.flight.update({
+                where: { id: flightId },
+                data: { totalSeats: newSeats },
+            });
+
+            return updatedFlight;
+        });
+
+        return transaction;
     }
 }
 

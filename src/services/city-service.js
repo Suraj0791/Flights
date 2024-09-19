@@ -29,7 +29,56 @@ async function createCity(data) {
     }
 }
 
+async function getAllCities() {
+  try {
+    const cities = await cityRepository.getAll();
+    return cities;
+  } catch(error) {
+    throw new AppError('Cannot retrieve all cities', StatusCodes.INTERNAL_SERVER_ERROR);
+  }
+}
+
+async function getCityById(id){
+  try {
+    const city = await cityRepository.getById(id);
+    if(!city){
+        throw new AppError('City not found', StatusCodes.NOT_FOUND);
+    }
+    return city;
+  } catch(error) {
+    throw new AppError('Cannot retrieve city by id', StatusCodes.INTERNAL_SERVER_ERROR);
+  }
+}
+
+async function updateCity(id, data){
+  try {
+    const city = await cityRepository.update(id, data);
+    if(!city){
+        throw new AppError('City not found', StatusCodes.NOT_FOUND);
+    }
+    return city;
+  } catch(error) {
+    throw new AppError('Cannot update city by id', StatusCodes.INTERNAL_SERVER_ERROR);
+  }
+}
+
+async function deleteCity(id){
+  try {
+    const city = await cityRepository.delete(id);
+    if(!city){
+        throw new AppError('City not found', StatusCodes.NOT_FOUND);
+    }
+    return city;
+  } catch(error) {
+    throw new AppError('Cannot delete city by id', StatusCodes.INTERNAL_SERVER_ERROR);
+  }
+}
+
 module.exports = {
-    createCity
+    createCity,
+    getAllCities,
+    getCityById,
+    updateCity,
+    deleteCity
 }
 
