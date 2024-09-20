@@ -1,6 +1,9 @@
 const CrudRepository = require('./crud-repository');
-const { PrismaClient ,City} = require('@prisma/client');
+const { PrismaClient } = require('@prisma/client');
+
+
 const prisma = new PrismaClient();
+const City = prisma.city; // Using Prisma model directly
 
 class CityRepository extends CrudRepository {
     constructor() {

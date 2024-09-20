@@ -64,15 +64,14 @@ model Flight {
   departureTime      DateTime
   price              Int
   boardingGate       String?
-  totalSeats         Int
-  seats              Seat[]
+  totalSeats         Int //total remaining seats 
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
   @@map("Flights")
 }
 
-//setas m hamein jyada cru krna h nhi isilye seeder se value feed krenge 
+//setas m hamein jyada cruD krna h nhi isilye seeder se value feed krenge 
 model Seat {
   id         Int       @id @default(autoincrement())
   airplaneId Int
@@ -84,7 +83,6 @@ model Seat {
   updatedAt  DateTime  @updatedAt
 
   @@map("Seats")
-  Flight Flight[]
 }
 
 enum SeatType {

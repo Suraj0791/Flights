@@ -34,7 +34,7 @@ class FlightRepository extends CrudRepository {
         const transaction = await prisma.$transaction(async (prisma) => {
             // Fetch the flight record with a row lock using Prisma's forUpdate option
             const flight = await prisma.flight.findUnique({
-                where: { id: flightId },
+                where: {id: parseInt(flightId, 10) },
                 select: { totalSeats: true }
             });
 
@@ -42,10 +42,22 @@ class FlightRepository extends CrudRepository {
                 throw new Error("Flight not found");
             }
 
-            const newSeats = dec ? flight.totalSeats - seats : flight.totalSeats + seats;
+            const seatCount = parseInt(seats, 10);
+        if (isNaN(seatCount)) {
+            throw new Error("Invalid seats value");
+        }
+            
+            const decreaseSeats = dec === 'true' || dec === true;
+
+
+
+            const newSeats = decreaseSeats 
+            ? flight.totalSeats - seatCount  // Decrement if dec is true
+            : flight.totalSeats + seatCount; // Increment if dec is false
+
 
             const updatedFlight = await prisma.flight.update({
-                where: { id: flightId },
+                where: { id: parseInt(flightId, 10) },
                 data: { totalSeats: newSeats },
             });
 

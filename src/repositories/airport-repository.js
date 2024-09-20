@@ -1,7 +1,9 @@
 const CrudRepository = require('./crud-repository');
-const { PrismaClient ,Airport} = require('@prisma/client');
+const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
+
+const Airport=prisma.airport;
 
 
 

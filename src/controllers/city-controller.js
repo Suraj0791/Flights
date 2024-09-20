@@ -10,9 +10,8 @@ const { SuccessResponse, ErrorResponse } = require('../utils/common');
  */
 async function createCity(req, res) {
     try {
-        const city = await CityService.createCity({
-            name: req.body.name
-        });
+        const data = req.body;
+        const city = await CityService.createCity(data);
         SuccessResponse.data = city;
         return res
                 .status(StatusCodes.CREATED)
